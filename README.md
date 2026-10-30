@@ -1,9 +1,11 @@
-# Week44ProductList
- 
+# Week 2 – Product List Management System
+
+
+
 ## Prerequisites
 
 1. Install [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
-2. Open a terminal in this folder (`Week2ProductList`).
+2. Open a terminal in this folder (`Week44ProductList`).
 3. Run:
 
 ```bash
@@ -37,7 +39,158 @@ Initial input for every level (from the PDF):
 
 ---
 
-## Level 1 – Basic Product List (current code)
+## Level 3 – Error handling & dynamic management (current code)
+
+### Goal
+
+- **Error handling** for empty product name, invalid price, and negative price.
+- After the list is shown, the user can **keep managing** (add more products).
+- **LINQ** refactors: `OrderBy`, `Sum`, `Where`, `FirstOrDefault`.
+
+### Project layout
+
+```
+Week2ProductList/
+├── Program.cs                 # Outer + inner loops
+├── Models/Product.cs
+├── Services/ProductManager.cs # TryAddProduct, LINQ helpers
+├── Helpers/
+│   └── InputHelper.cs         # Read and validate console input
+└── README.md
+```
+
+### Program flow (two loops)
+
+1. **Inner loop** — add products until the user answers **n** to “Add another product now?”
+2. **Show** the sorted list and total (same as Level 2).
+3. **Outer loop** — ask “Continue managing products?” If **y**, go back to step 1. If **n**, exit.
+
+This matches the PDF: you are not forced to quit after one list.
+
+### Validation rules
+
+| Input | Rule | Where |
+|--------|------|--------|
+| Name | Cannot be empty | `InputHelper.ReadProductName()` |
+| Price | Must be a number | `InputHelper.ReadValidPrice()` |
+| Price | Cannot be negative | `InputHelper.ReadValidPrice()` + `TryAddProduct()` |
+
+Invalid input shows an **error message** and asks again — the product is **not** added.
+
+### LINQ in `ProductManager`
+
+| Method | LINQ | Purpose |
+|--------|------|---------|
+| `ShowProducts()` | `OrderBy(p => p.Price)` | Sort for display |
+| `CalculateTotal()` | `Sum(p => p.Price)` | Total price |
+| `GetProductsByCategory()` | `Where(...)` | Filter by category (Level 4 search builds on this) |
+| `FindByName()` | `FirstOrDefault(...)` | Find one product by name |
+| `HasProducts` | `Any()` | True if list is not empty |
+
+### How to test Level 3
+
+1. Run `dotnet run`.
+2. Press Enter on **name** with nothing typed — you should see an error and get asked again.
+3. Enter **abc** as price — error, retry.
+4. Enter **-5** — error, retry.
+5. Add two valid products, answer **n** to stop adding in this session.
+6. Confirm sorted list and total.
+7. Answer **y** to “Continue managing?” — add another product and confirm the list updates.
+8. Answer **n** to exit.
+
+### Git commit example
+
+```bash
+git add Week2ProductList/
+git commit -m "Week2 Level 3: validation, manage loop, LINQ Sum/Where/FirstOrDefault"
+git push
+```
+
+---
+
+## Level 2 – Multiple classes & price summary (completed earlier)
+
+### Goal
+
+- Use **two classes**: `Product` and **`ProductManager`**.
+- Move list logic into methods: **`AddProduct()`**, **`ShowProducts()`**, **`CalculateTotal()`**.
+- When showing products, sort **lowest → highest price**.
+- Display **total price** at the bottom of the list.
+
+### Project layout
+
+```
+Week2ProductList/
+├── Week2ProductList.csproj
+├── Program.cs                 # Reads input; uses ProductManager
+├── Models/
+│   └── Product.cs             # Data only
+├── Services/
+│   └── ProductManager.cs      # List + add / show / total
+└── README.md
+```
+
+### What changed from Level 1?
+
+| Level 1 | Level 2 |
+|---------|---------|
+| `List<Product>` in `Program.cs` | List hidden inside `ProductManager` |
+| `products.Add(...)` in Program | `manager.AddProduct(...)` |
+| Print loop in Program | `manager.ShowProducts()` |
+| Count only at end | **Sorted** list + **total price** |
+
+### Key C# ideas
+
+#### 1. Separation of concerns
+
+- **`Product`**: holds category, name, price.
+- **`ProductManager`**: knows how to store and display many products.
+
+`Program.cs` stays thin: it only reads from the console and calls the manager.
+
+#### 2. Methods on a class
+
+```csharp
+manager.AddProduct(newProduct);
+manager.ShowProducts();
+decimal total = manager.CalculateTotal();
+```
+
+Methods are functions that belong to an object (`manager`).
+
+#### 3. Sorting with `OrderBy`
+
+Inside `ShowProducts()`:
+
+```csharp
+foreach (Product product in _products.OrderBy(p => p.Price))
+```
+
+`OrderBy(p => p.Price)` means “sort by the `Price` property.” This is **LINQ** (we use more of it in Level 3).
+
+#### 4. `CalculateTotal()`
+
+A `foreach` loop adds each `Price` into a `decimal` variable. Using `decimal` avoids rounding errors with money.
+
+### How to test Level 2
+
+1. Run `dotnet run`.
+2. Add products with prices out of order (e.g. 50, 10, 30).
+3. Answer **n** to stop adding.
+4. Confirm lines appear **10 → 30 → 50** (low to high).
+5. Confirm **Total price** equals the sum.
+
+### Git commit example
+
+```bash
+git add Week2ProductList/
+git commit -m "Week2 Level 2: ProductManager, sort by price, total"
+git push
+```
+
+---
+
+## Level 1 – Basic Product List (completed earlier)
 
 ### Goal
 
@@ -51,10 +204,10 @@ Initial input for every level (from the PDF):
 ```
 Week2ProductList/
 ├── Week2ProductList.csproj   # Project file (targets net8.0)
-├── Program.cs                # Entry point — user interaction & list
-├── Models/
-│   └── Product.cs            # Data class for one product
-└── README.md                 # This file
+├── Program.cs
+├── Models/Product.cs
+├── Services/ProductManager.cs   # Added in Level 2
+└── README.md
 ```
 
 ### Key C# ideas (beginner-friendly)
@@ -109,11 +262,10 @@ Prints each product. `ToString()` on `Product` controls what appears on screen.
 
 The program repeats “add product” until the user answers **n** to “Add another product?”.
 
-### What Level 1 deliberately does *not* do yet
+### What Level 1 did not include (added in later levels)
 
-- No `ProductManager` class (Level 2).
-- No sorting or total price (Level 2).
-- No strong validation for empty names or bad prices (Level 3).
+- `ProductManager`, sorting, and total price → **Level 2**.
+- Strong validation for empty names or bad prices (Level 3).
 - No search or colors (Level 4).
 - No file save or menu (Level 5).
 
@@ -130,19 +282,7 @@ That keeps Level 1 small and easy to understand.
 
 ## Roadmap: what changes in later levels
 
-### Level 2 – Multiple classes & price summary
-
-- New class: **`ProductManager`** with `AddProduct()`, `ShowProducts()`, `CalculateTotal()`.
-- Sort products **lowest → highest price** before display.
-- Show **total price** at the bottom.
-
-### Level 3 – Error handling & dynamic management
-
-- Reject **empty names**, **invalid** or **negative** prices.
-- After showing the list, let the user **add more** products (main menu loop).
-- Use **LINQ**: `OrderBy()`, `Sum()`, `Where()`, `FirstOrDefault()`.
-
-### Level 4 – Search & highlight
+### Level 4 – Search & highlight (next)
 
 - Search by **name** or **category**.
 - Use **`Console.ForegroundColor`** / **`BackgroundColor`** to highlight matches.
@@ -153,8 +293,6 @@ That keeps Level 1 small and easy to understand.
 - **Save/load** with JSON (or text file).
 - **Statistics** (min, max, average, count per category).
 - **Menu-driven** console UI.
-
-### Level 6 – Bonus (optional)
 
 - Pagination, price-range filter, sort direction, export TXT, category colors, admin mode, unit tests, etc.
 
@@ -183,3 +321,4 @@ Repeat for Level 2, 3, … with clear commit messages.
 | Wrong decimal separator | Depends on regional settings; type `19.99` or `19,99` as your culture expects. |
 
 ---
+

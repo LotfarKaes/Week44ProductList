@@ -1,71 +1,63 @@
-﻿using Week44ProductList.Models;
+﻿using Week44ProductList.Helpers;
 using Week44ProductList.Services;
-
 
 // =============================================================================
 // Checkpoint 2 – Product List Management System
-// LEVEL 2 – Multiple Classes & Price Summary
+// LEVEL 3 – Error Handling & Dynamic Product Management
 // =============================================================================
-// Learning focus for Level 2:
-//   • Two classes: Product (data) + ProductManager (behavior)
-//   • Methods: AddProduct(), ShowProducts(), CalculateTotal()
-//   • Sort by price (low → high) when showing the list
-//   • Show total price at the bottom
+// Learning focus for Level 3:
+//   • Validation: empty name, invalid price, negative price
+//   • After showing the list, user can add more products (outer loop)
+//   • LINQ: OrderBy, Sum, Where, FirstOrDefault (see ProductManager)
 // =============================================================================
 
-Console.WriteLine("=== Product List Management (Level 2) ===");
+Console.WriteLine("=== Product List Management (Level 3) ===");
 Console.WriteLine();
 
-// ProductManager owns the List<Product> now — Program only talks to the manager.
 ProductManager manager = new ProductManager();
 
-bool keepAdding = true;
+// Outer loop: "dynamic product management" — show list, then optionally add more.
+bool keepManaging = true;
 
-while (keepAdding)
+while (keepManaging)
 {
-    Console.WriteLine("--- Add a new product ---");
-
-    Console.Write("Product category: ");
-    string category = Console.ReadLine() ?? string.Empty;
-
-    Console.Write("Product name: ");
-    string name = Console.ReadLine() ?? string.Empty;
-
-    Console.Write("Product price: ");
-    string priceText = Console.ReadLine() ?? string.Empty;
-
-    // Level 3 will add proper validation; Level 2 keeps the same simple parse as Level 1.
-    if (!decimal.TryParse(priceText, out decimal price))
-    {
-        Console.WriteLine("Could not read price as a number. Using 0 for now (Level 3 will handle this better).");
-        price = 0;
-    }
-
-    Product newProduct = new Product
-    {
-        Category = category,
-        Name = name,
-        Price = price
-    };
-
-    // Delegate storage to ProductManager instead of products.Add(...) in Program.
-    manager.AddProduct(newProduct);
-
-    Console.WriteLine("Product added!");
+    Console.WriteLine("--- Add products (enter details for each item) ---");
     Console.WriteLine();
 
-    Console.Write("Add another product? (y/n): ");
-    string again = (Console.ReadLine() ?? "n").Trim().ToLowerInvariant();
-    keepAdding = again == "y" || again == "yes";
+    // Inner loop: add one or more products before we show the list again.
+    bool addMoreInThisSession = true;
+
+    while (addMoreInThisSession)
+    {
+        string category = InputHelper.ReadCategory();
+        string name = InputHelper.ReadProductName();
+        decimal price = InputHelper.ReadValidPrice();
+
+        // Double-check via manager (defense in depth — rules live in one place too).
+        if (!manager.TryAddProduct(category, name, price, out string error))
+        {
+            Console.WriteLine($"Could not add product: {error}");
+        }
+        else
+        {
+            Console.WriteLine("Product added!");
+        }
+
+        Console.WriteLine();
+        addMoreInThisSession = InputHelper.ReadYesNo("Add another product now? (y/n): ");
+    }
+
+    Console.WriteLine();
+    Console.WriteLine("=== Your product list ===");
+    Console.WriteLine();
+    manager.ShowProducts();
+
+    Console.WriteLine();
+    keepManaging = InputHelper.ReadYesNo(
+        "Continue managing products (add more after this list)? (y/n): ");
+    Console.WriteLine();
 }
 
-Console.WriteLine();
-Console.WriteLine("=== Your product list ===");
-Console.WriteLine();
-
-// ShowProducts sorts, prints each line, and shows total price.
-manager.ShowProducts();
-
-Console.WriteLine();
+Console.WriteLine("Thank you for using Product List Management.");
 Console.WriteLine("Press Enter to exit...");
 Console.ReadLine();
