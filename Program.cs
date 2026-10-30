@@ -1,31 +1,30 @@
 ﻿using Week44ProductList.Models;
+using Week44ProductList.Services;
+
 
 // =============================================================================
 // Checkpoint 2 – Product List Management System
-// LEVEL 1 – Basic Product List
+// LEVEL 2 – Multiple Classes & Price Summary
 // =============================================================================
-// Learning focus for Level 1:
-//   • One class (Product)
-//   • List<T> collection to store many products
-//   • Add products while the program runs ("dynamically")
-//   • Show every product on screen
+// Learning focus for Level 2:
+//   • Two classes: Product (data) + ProductManager (behavior)
+//   • Methods: AddProduct(), ShowProducts(), CalculateTotal()
+//   • Sort by price (low → high) when showing the list
+//   • Show total price at the bottom
 // =============================================================================
 
-Console.WriteLine("=== Product List Management (Level 1) ===");
+Console.WriteLine("=== Product List Management (Level 2) ===");
 Console.WriteLine();
 
-// List<Product> is a generic collection: it only holds Product objects.
-// We create it empty and grow it each time the user adds a product.
-List<Product> products = new List<Product>();
+// ProductManager owns the List<Product> now — Program only talks to the manager.
+ProductManager manager = new ProductManager();
 
-// Main loop: keep asking until the user chooses to stop.
 bool keepAdding = true;
 
 while (keepAdding)
 {
     Console.WriteLine("--- Add a new product ---");
 
-    // Read three values from the user (assignment: Category, Name, Price).
     Console.Write("Product category: ");
     string category = Console.ReadLine() ?? string.Empty;
 
@@ -35,14 +34,13 @@ while (keepAdding)
     Console.Write("Product price: ");
     string priceText = Console.ReadLine() ?? string.Empty;
 
-    // Level 1 keeps parsing simple. Level 3 adds proper validation and error messages.
+    // Level 3 will add proper validation; Level 2 keeps the same simple parse as Level 1.
     if (!decimal.TryParse(priceText, out decimal price))
     {
         Console.WriteLine("Could not read price as a number. Using 0 for now (Level 3 will handle this better).");
         price = 0;
     }
 
-    // "new Product" creates an object (instance) from the Product class.
     Product newProduct = new Product
     {
         Category = category,
@@ -50,8 +48,8 @@ while (keepAdding)
         Price = price
     };
 
-    // Add pushes the object onto the end of the list.
-    products.Add(newProduct);
+    // Delegate storage to ProductManager instead of products.Add(...) in Program.
+    manager.AddProduct(newProduct);
 
     Console.WriteLine("Product added!");
     Console.WriteLine();
@@ -61,25 +59,12 @@ while (keepAdding)
     keepAdding = again == "y" || again == "yes";
 }
 
-// Present all products after the user is done adding.
 Console.WriteLine();
 Console.WriteLine("=== Your product list ===");
+Console.WriteLine();
 
-if (products.Count == 0)
-{
-    Console.WriteLine("(No products were added.)");
-}
-else
-{
-    // foreach walks through every item in the list — no index needed.
-    foreach (Product product in products)
-    {
-        Console.WriteLine(product);
-    }
-
-    Console.WriteLine();
-    Console.WriteLine($"Total products: {products.Count}");
-}
+// ShowProducts sorts, prints each line, and shows total price.
+manager.ShowProducts();
 
 Console.WriteLine();
 Console.WriteLine("Press Enter to exit...");
