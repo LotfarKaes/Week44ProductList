@@ -1,11 +1,10 @@
 # Week 2 – Product List Management System
 
 
-
 ## Prerequisites
 
 1. Install [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
-2. Open a terminal in this folder (`Week44ProductList`).
+2. Open a terminal in this folder (`Week2ProductList`).
 3. Run:
 
 ```bash
@@ -39,7 +38,69 @@ Initial input for every level (from the PDF):
 
 ---
 
-## Level 3 – Error handling & dynamic management (current code)
+## Level 4 – Search & highlight (current code)
+
+### Goal
+
+- **Search** products by **name** or **category** (assignment part A).
+- When products match, **highlight** them with console colors (part B).
+- Keep Level 3 validation and the ability to add more products after each session.
+
+### New / updated files
+
+| File | Role |
+|------|------|
+| `Helpers/ConsoleUiHelper.cs` | Saves/restores colors; prints highlighted lines |
+| `Services/ProductManager.cs` | `SearchByName`, `SearchByCategory`, `ShowSearchResults`, `ShowProducts(highlight)` |
+| `Helpers/InputHelper.cs` | `ReadSearchTerm`, `ReadSearchOption` |
+| `Program.cs` | `RunSearchLoop` after each list |
+
+### How search works
+
+1. After the sorted list is shown, you can answer **y** to “Would you like to search products?”
+2. Choose **1** (name) or **2** (category).
+3. Type part of a name or category — matching is **case-insensitive** and uses **Contains** (e.g. `phone` finds “Smartphone”).
+4. The app prints:
+   - Matching rows **highlighted** (dark yellow background).
+   - The **full list** again, with the same rows highlighted so you see them in context.
+
+Highlighting uses:
+
+```csharp
+Console.BackgroundColor = ConsoleColor.DarkYellow;
+Console.ForegroundColor = ConsoleColor.Black;
+// print line, then restore previous colors
+```
+
+See `ConsoleUiHelper.WriteHighlightedLine`.
+
+### LINQ used in search
+
+```csharp
+_products.Where(p => p.Name.Contains(term, StringComparison.OrdinalIgnoreCase))
+```
+
+Same pattern for category in `SearchByCategory`.
+
+### How to test Level 4
+
+1. Add e.g. `[Electronics] Phone — 500`, `[Electronics] Case — 20`, `[Food] Apple — 5`.
+2. After the list, search **y** → **1** → `phone` → one highlighted match.
+3. Search **y** → **2** → `elec` → two matches highlighted on the full list.
+4. Search for `xyz` → “No products found.”
+5. Answer **n** to stop searching, then **n** to exit (or **y** to add more products).
+
+### Git commit example
+
+```bash
+git add Week2ProductList/
+git commit -m "Week2 Level 4: search by name/category with console highlight"
+git push
+```
+
+---
+
+## Level 3 – Error handling & dynamic management (completed earlier)
 
 ### Goal
 
@@ -282,17 +343,14 @@ That keeps Level 1 small and easy to understand.
 
 ## Roadmap: what changes in later levels
 
-### Level 4 – Search & highlight (next)
-
-- Search by **name** or **category**.
-- Use **`Console.ForegroundColor`** / **`BackgroundColor`** to highlight matches.
-
-### Level 5 – Advanced system
+### Level 5 – Advanced system (next)
 
 - Auto **product ID**, **edit**, **delete**.
 - **Save/load** with JSON (or text file).
 - **Statistics** (min, max, average, count per category).
 - **Menu-driven** console UI.
+
+### Level 6 – Bonus (optional)
 
 - Pagination, price-range filter, sort direction, export TXT, category colors, admin mode, unit tests, etc.
 
@@ -321,4 +379,3 @@ Repeat for Level 2, 3, … with clear commit messages.
 | Wrong decimal separator | Depends on regional settings; type `19.99` or `19,99` as your culture expects. |
 
 ---
-

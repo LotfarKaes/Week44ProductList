@@ -1,14 +1,10 @@
 namespace Week44ProductList.Helpers;
 
 /// <summary>
-/// Level 3: Central place for reading and validating console input.
-/// Keeps Program.cs readable and groups all "error handling" rules in one file.
+/// Central place for reading and validating console input.
 /// </summary>
 public static class InputHelper
 {
-    /// <summary>
-    /// Reads a product name until it is not empty/whitespace (assignment requirement).
-    /// </summary>
     public static string ReadProductName()
     {
         while (true)
@@ -27,18 +23,12 @@ public static class InputHelper
         }
     }
 
-    /// <summary>
-    /// Reads category (optional text — no strict rule in Level 3 PDF, but we trim it).
-    /// </summary>
     public static string ReadCategory()
     {
         Console.Write("Product category: ");
         return (Console.ReadLine() ?? string.Empty).Trim();
     }
 
-    /// <summary>
-    /// Reads price until it is a valid number and not negative (assignment requirement).
-    /// </summary>
     public static decimal ReadValidPrice()
     {
         while (true)
@@ -64,8 +54,56 @@ public static class InputHelper
     }
 
     /// <summary>
-    /// Reads y/n (or yes/no) from the user.
+    /// Level 4: Search text cannot be empty (otherwise every product would "match").
     /// </summary>
+    public static string ReadSearchTerm(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            string? input = Console.ReadLine();
+            string term = input?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                Console.WriteLine("Error: Search text cannot be empty. Please try again.");
+                continue;
+            }
+
+            return term;
+        }
+    }
+
+    /// <summary>
+    /// Level 4: User picks search by name (1) or category (2).
+    /// </summary>
+    public static int ReadSearchOption()
+    {
+        while (true)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Search by:");
+            Console.WriteLine("  1 - Product name");
+            Console.WriteLine("  2 - Category");
+            Console.Write("Your choice (1 or 2): ");
+
+            string? input = Console.ReadLine();
+            string choice = input?.Trim() ?? string.Empty;
+
+            if (choice == "1")
+            {
+                return 1;
+            }
+
+            if (choice == "2")
+            {
+                return 2;
+            }
+
+            Console.WriteLine("Please enter 1 or 2.");
+        }
+    }
+
     public static bool ReadYesNo(string prompt, bool defaultYes = false)
     {
         while (true)
