@@ -58,7 +58,7 @@ public class ProductManager
 
         foreach (Product product in _products.OrderBy(p => p.Price))
         {
-            Console.WriteLine(product);
+            Console.WriteLine($"| {product.Category} | {product.Name} | {product.Price:C}");
         }
 
         Console.WriteLine(new string('-', 40));
