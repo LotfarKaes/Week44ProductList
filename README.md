@@ -1,5 +1,7 @@
-# Week 2 – Product List Management System
+# Week 44 – Product List Management System
+Console application in C# and .NET 8, built step by step for Checkpoint 2 (Product List Management System).
 
+Implement five levels in this code base project folder. Each level adds new concepts. Commit and push one level at a time so progress can be reviewed.
 
 ## Prerequisites
 
@@ -349,9 +351,6 @@ That keeps Level 1 small and easy to understand.
 - **Save/load** with JSON (or text file).
 - **Statistics** (min, max, average, count per category).
 - **Menu-driven** console UI.
-
-### Level 6 – Bonus (optional)
-
 - Pagination, price-range filter, sort direction, export TXT, category colors, admin mode, unit tests, etc.
 
 ---
